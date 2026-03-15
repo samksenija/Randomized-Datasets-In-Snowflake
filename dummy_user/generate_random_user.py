@@ -13,7 +13,7 @@ def generate_random_name_and_surname(number_of_records):
             surname = person['name']['last']
             email = person['email']
 
-            persons.append((name, surname, email))
+            persons.append([name, surname, email])
         
         return persons
     except:

@@ -6,17 +6,13 @@ import generate_random_user
 
 #Here, name, surname & email address will be generated in order to 
 #Complete the random data population for doctors & patients
-cursor = connection_snowflake.conn.cursor()
+session = connection_snowflake.new_session
 
+session.sql('CREATE TABLE IF NOT EXISTS dummy_user_data (first_name VARCHAR(30), last_name VARCHAR(30), email VARCHAR(50))').collect()
 
-insert_name_surname_and_email_address = """
-    INSERT INTO DUMMY_DATASETS.SCHEMA_FOR_DUMMY_DATA.DUMMY_DOCTOR_INFORMATION (first_name, last_name, email) VALUES (?, ?, ?)
-"""
+persons_data = generate_random_user.generate_random_name_and_surname(5000)
+df = session.create_dataframe(persons_data, schema = ["FIRST_NAME", "LAST_NAME", "EMAIL"])
+df.write.insert_into("dummy_user_data")
+session.table("dummy_user_data").collect()
 
-information = generate_random_user.generate_random_name_and_surname(1000)
-
-cursor.executemany(insert_name_surname_and_email_address, information)
-
-connection_snowflake.conn.commit()
-
-cursor.close()
+session.close()
